@@ -14,16 +14,47 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ```{r}
-
-test = 42224234
+data = read.csv("day.csv")
 
 ```
 
-# 1.1
+We will apply the same changes as we did in previous exercises
 
 ```{r}
-
+data$season = as.factor(data$season)
+data$MISTY = ifelse(data$weathersit == 2 , 1 , 0)
+data$RAIN = ifelse (data$weathersit > 2 , 1 , 0)
+data$spring = ifelse (data$season == 2, 1 , 0)
+data$summer = ifelse (data$season == 3, 1 , 0)
+data$fall = ifelse (data$season == 4, 1 , 0)
+data$temp = data$temp * 47 - 8
+data$hum = data$hum * 100
+data$windspeed = data$windspeed * 67
+data$days_since_2011 = c(0:730)
 ```
+
+```{r}
+library(randomForest)
+
+formula = cnt ~ workingday + holiday + spring + summer + fall + MISTY + RAIN + temp + hum + windspeed + days_since_2011
+
+modelo_rf <- randomForest(formula, data=data, ntree=100)
+```
+
+```{r}
+library(pdp)
+
+pdp_days = partial(modelo_rf, pred.var = "days_since_2011")
+pdp_temp = partial(modelo_rf, pred.var = "temp")
+pdp_hum = partial(modelo_rf, pred.var = "hum")
+pdp_wind = partial(modelo_rf, pred.var = "windspeed")
+
+plot(pdp_wind)
+```
+
+
+
+
 
 
 
