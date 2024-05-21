@@ -33,28 +33,71 @@ data$windspeed = data$windspeed * 67
 data$days_since_2011 = c(0:730)
 ```
 
+
 ```{r}
 library(randomForest)
 
 formula = cnt ~ workingday + holiday + spring + summer + fall + MISTY + RAIN + temp + hum + windspeed + days_since_2011
 
-modelo_rf <- randomForest(formula, data=data, ntree=100)
+modelo_rf <- randomForest(formula, data=data , ntree = 10)
 ```
+
 
 ```{r}
 library(pdp)
 
-pdp_days = partial(modelo_rf, pred.var = "days_since_2011")
-pdp_temp = partial(modelo_rf, pred.var = "temp")
-pdp_hum = partial(modelo_rf, pred.var = "hum")
-pdp_wind = partial(modelo_rf, pred.var = "windspeed")
+pdp_days = partial(modelo_rf, grid.resolution = nrow(data), pred.var = "days_since_2011")
+pdp_temp = partial(modelo_rf, grid.resolution = nrow(data), pred.var = "temp")
+pdp_hum = partial(modelo_rf, grid.resolution = nrow(data), pred.var = "hum")
+pdp_wind = partial(modelo_rf, grid.resolution = nrow(data), pred.var = "windspeed")
 
-plot(pdp_wind)
+
 ```
 
 
 
+```{r}
+library(ggplot2)
+library(gridExtra)
+p1 = ggplot(data = pdp_hum , aes (x = hum, y = yhat)) + geom_line(size = 1.5)+ 
+      scale_x_continuous(limits = c(0, max(pdp_hum$hum))) + 
+      scale_y_continuous(limits = c(0, max(pdp_hum$yhat))) + geom_rug(aes( x = data$hum) ,sides = 'b') +
+      labs(
+        x = "Humidity",
+        y = "Predicted number of bike rentals"
+      ) + theme_minimal()
 
+
+p2 = ggplot(data = pdp_days , aes (x = days_since_2011, y = yhat)) + geom_line(size = 1.5)+ 
+      scale_x_continuous(limits = c(0, max(pdp_days$days_since_2011))) + 
+      scale_y_continuous(limits = c(0, max(pdp_days$yhat))) + geom_rug(aes(data$days_since_2011) , sides = 'b') +
+      labs(
+        x = "Days",
+        y = "Predicted number of bike rentals"
+      ) + theme_minimal()
+
+
+p3 = ggplot(data = pdp_temp , aes (x = temp, y = yhat)) + geom_line(size = 1.5)+ 
+      scale_x_continuous(limits = c( min(pdp_temp$temp), max(pdp_temp$temp))) + 
+      scale_y_continuous(limits = c(0, max(pdp_temp$yhat))) + geom_rug(aes(x = data$temp) ,sides = 'b') +
+      labs(
+        x = "Temperature",
+        y = "Predicted number of bike rentals"
+      ) + theme_minimal()
+
+
+p4 = ggplot(data = pdp_wind , aes (x = windspeed, y = yhat)) + geom_line(size = 1.5)+ 
+      scale_x_continuous(limits = c(0, max(pdp_wind$windspeed))) + 
+      scale_y_continuous(limits = c(0, max(pdp_wind$yhat))) + geom_rug(aes(x = data$windspeed) , sides = 'b') +
+      labs(
+        x = "Windspeed",
+        y = "Predicted number of bike rentals"
+      ) + theme_minimal()
+
+
+
+grid.arrange(p1,p2,p3,p4, nrow = 1)
+```
 
 
 
