@@ -14,10 +14,90 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ```{r}
+data = read.csv("day.csv")
+
+```
+
+We will apply the same changes as we did in previous exercises
+
+```{r}
+data$season = as.factor(data$season)
+data$MISTY = ifelse(data$weathersit == 2 , 1 , 0)
+data$RAIN = ifelse (data$weathersit > 2 , 1 , 0)
+data$spring = ifelse (data$season == 2, 1 , 0)
+data$summer = ifelse (data$season == 3, 1 , 0)
+data$fall = ifelse (data$season == 4, 1 , 0)
+data$temp = data$temp * 47 - 8
+data$hum = data$hum * 100
+data$windspeed = data$windspeed * 67
+data$days_since_2011 = c(0:730)
+```
+
+
+```{r}
+library(randomForest)
+
+formula = cnt ~ workingday + holiday + spring + summer + fall + MISTY + RAIN + temp + hum + windspeed + days_since_2011
+
+modelo_rf <- randomForest(formula, data=data , ntree = 10)
+```
+
+
+```{r}
+library(pdp)
+
+pdp_days = partial(modelo_rf, grid.resolution = nrow(data), pred.var = "days_since_2011")
+pdp_temp = partial(modelo_rf, grid.resolution = nrow(data), pred.var = "temp")
+pdp_hum = partial(modelo_rf, grid.resolution = nrow(data), pred.var = "hum")
+pdp_wind = partial(modelo_rf, grid.resolution = nrow(data), pred.var = "windspeed")
+
 
 ```
 
 
+
+```{r}
+library(ggplot2)
+library(gridExtra)
+p1 = ggplot(data = pdp_hum , aes (x = hum, y = yhat)) + geom_line(size = 1.5)+ 
+      scale_x_continuous(limits = c(0, max(pdp_hum$hum))) + 
+      scale_y_continuous(limits = c(0, max(pdp_hum$yhat))) + geom_rug(aes( x = data$hum) ,sides = 'b') +
+      labs(
+        x = "Humidity",
+        y = "Predicted number of bike rentals"
+      ) + theme_minimal()
+
+
+p2 = ggplot(data = pdp_days , aes (x = days_since_2011, y = yhat)) + geom_line(size = 1.5)+ 
+      scale_x_continuous(limits = c(0, max(pdp_days$days_since_2011))) + 
+      scale_y_continuous(limits = c(0, max(pdp_days$yhat))) + geom_rug(aes(data$days_since_2011) , sides = 'b') +
+      labs(
+        x = "Days",
+        y = "Predicted number of bike rentals"
+      ) + theme_minimal()
+
+
+p3 = ggplot(data = pdp_temp , aes (x = temp, y = yhat)) + geom_line(size = 1.5)+ 
+      scale_x_continuous(limits = c( min(pdp_temp$temp), max(pdp_temp$temp))) + 
+      scale_y_continuous(limits = c(0, max(pdp_temp$yhat))) + geom_rug(aes(x = data$temp) ,sides = 'b') +
+      labs(
+        x = "Temperature",
+        y = "Predicted number of bike rentals"
+      ) + theme_minimal()
+
+
+p4 = ggplot(data = pdp_wind , aes (x = windspeed, y = yhat)) + geom_line(size = 1.5)+ 
+      scale_x_continuous(limits = c(0, max(pdp_wind$windspeed))) + 
+      scale_y_continuous(limits = c(0, max(pdp_wind$yhat))) + geom_rug(aes(x = data$windspeed) , sides = 'b') +
+      labs(
+        x = "Windspeed",
+        y = "Predicted number of bike rentals"
+      ) + theme_minimal()
+
+
+
+grid.arrange(p2,p3,p1,p4, nrow = 1)
+```
 
 
 
