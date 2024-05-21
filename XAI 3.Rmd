@@ -1,11 +1,43 @@
 ---
 title: "XAI 3"
-author: "Alejandro Hidalgo Raga"
-date: "2024-05-18"
+author: "Pablo, Alejandro, Juan"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+# Exercise 1
+
+
+```{r}
+
+```
+
+
+
+
+
+
+
+# Exercise 2
+
+```{r}
+
+```
+
+
+
+
+
+# Exercise 3
+
+
+
+```{r}
+
 ```
 
