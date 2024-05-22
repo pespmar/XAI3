@@ -1,7 +1,6 @@
 ---
 title: "XAI 3"
-author: "Alejandro Hidalgo Raga"
-date: "2024-05-18"
+author: "Pablo, Alejandro, Juan"
 output: html_document
 ---
 
@@ -9,7 +8,20 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-EJERCICIO 2
+
+
+# Exercise 1
+
+
+```{r}
+
+```
+
+
+
+
+# Exercise 2
+
 
 ```{r}
 data= read.csv('day.csv')
@@ -32,7 +44,7 @@ library(pdp)
 library(ggplot2)
 
 set.seed(42)
-sampled_data <- data[sample(nrow(data), 100), ]
+sampled_data <- data[sample(nrow(data), 200), ]
 
 # Train the random forest model
 set.seed(42)
@@ -55,5 +67,14 @@ ggplot() +
 ```
 
 
-`
+
+
+
+# Exercise 3
+
+
+
+```{r}
+
+```
 
