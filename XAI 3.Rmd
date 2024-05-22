@@ -104,20 +104,6 @@ grid.arrange(p2,p3,p1,p4, nrow = 1)
 
 
 ```{r}
-data= read.csv('day.csv')
-data$season = as.factor(data$season)
-data$MISTY = ifelse(data$weathersit == 2 , 1 , 0)
-data$RAIN = ifelse (data$weathersit > 2 , 1 , 0)
-data$spring = ifelse (data$season == 2, 1 , 0)
-data$summer = ifelse (data$season == 3, 1 , 0)
-data$fall = ifelse (data$season == 4, 1 , 0)
-data$temp = data$temp * 47 - 8
-data$hum = data$hum * 100
-data$windspeed = data$windspeed * 67
-data$days_since_2011 = c(0:730)
-```
-
-```{r}
 # Load necessary libraries
 library(randomForest)
 library(pdp)
