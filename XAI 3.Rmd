@@ -1,6 +1,7 @@
 ---
 title: "XAI 3"
-author: "Pablo, Alejandro, Juan"
+author: "Alejandro Hidalgo Raga"
+date: "2024-05-18"
 output: html_document
 ---
 
@@ -8,36 +9,51 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-
-
-# Exercise 1
-
+EJERCICIO 2
 
 ```{r}
+data= read.csv('day.csv')
+data$season = as.factor(data$season)
+data$MISTY = ifelse(data$weathersit == 2 , 1 , 0)
+data$RAIN = ifelse (data$weathersit > 2 , 1 , 0)
+data$spring = ifelse (data$season == 2, 1 , 0)
+data$summer = ifelse (data$season == 3, 1 , 0)
+data$fall = ifelse (data$season == 4, 1 , 0)
+data$temp = data$temp * 47 - 8
+data$hum = data$hum * 100
+data$windspeed = data$windspeed * 67
+data$days_since_2011 = c(0:730)
+```
+
+```{r}
+# Load necessary libraries
+library(randomForest)
+library(pdp)
+library(ggplot2)
+
+set.seed(42)
+sampled_data <- data[sample(nrow(data), 100), ]
+
+# Train the random forest model
+set.seed(42)
+rf_model <- randomForest(cnt ~ temp + hum, data = sampled_data, ntree = 10)
+
+# Generate Partial Dependency Data
+pdp_data <- partial(rf_model, pred.var = c("temp", "hum"), grid.resolution = 100)
+
+# Plot the 2D Partial Dependency Plot with Density Distributions
+ggplot() +
+  geom_tile(data=pdp_data, aes(x = temp, y = hum, fill = yhat), width = 1.5, height = 1.5) +
+  scale_fill_viridis_c(option = "inferno", name = "Bike Rentals") +
+  theme_minimal() +
+  labs(title = "2D Partial Dependency Plot for Bike Rentals",
+       x = "Temperature",
+       y = "Humidity") +
+ geom_rug(data = sampled_data, aes(x = temp, y = hum))
+
 
 ```
 
 
-
-
-
-
-
-# Exercise 2
-
-```{r}
-
-```
-
-
-
-
-
-# Exercise 3
-
-
-
-```{r}
-
-```
+`
 
