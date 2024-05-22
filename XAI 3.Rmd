@@ -18,12 +18,8 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
-
-
-
-
-
 # Exercise 2
+
 
 ```{r}
 
@@ -38,6 +34,46 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ```{r}
+library(randomForest)
+library(pdp)
+library(ggplot2)
+library(dplyr)
 
+data = read.csv("kc_house_data.csv")
+data = data %>%
+  select(price, bedrooms, bathrooms, sqft_living, sqft_lot, floors, yr_built)
+set.seed(42)
+sampled_data = data[sample(nrow(data), 5000), ]
+# Train the random forest model
+set.seed(42)
+rf_model = randomForest(price ~ ., data = sampled_data, ntree = 20)
+
+```
+
+```{r}
+pdp_sqft_living = partial(rf_model, pred.var = "sqft_living", plot = TRUE, rug = TRUE, 
+                           train = sampled_data, grid.resolution = 50)
+pdp_sqft_living$ylab = "Price"
+plot(pdp_sqft_living)
+```
+
+```{r}
+pdp_floors = partial(rf_model, pred.var = "floors", plot = TRUE, rug = TRUE, 
+                           train = sampled_data, grid.resolution = 50)
+pdp_floors$ylab = "Price"
+plot(pdp_floors)
+```
+
+```{r}
+pdp_bedrooms = partial(rf_model, pred.var = "bedrooms", plot = TRUE, rug = TRUE, 
+                           train = sampled_data, grid.resolution = 50)
+pdp_bedrooms$ylab = "Price"
+plot(pdp_bedrooms)
+```
+```{r}
+pdp_bathrooms = partial(rf_model, pred.var = "bathrooms", plot = TRUE, rug = TRUE, 
+                           train = sampled_data, grid.resolution = 50)
+pdp_bathrooms$ylab = "Price"
+plot(pdp_sqft_bathrooms)
 ```
 
