@@ -39,15 +39,13 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 library(randomForest)
-library(pdp)
-library(ggplot2)
 library(dplyr)
 
 data = read.csv("kc_house_data.csv")
 data = data %>%
   select(price, bedrooms, bathrooms, sqft_living, sqft_lot, floors, yr_built)
 set.seed(42)
-sampled_data = data[sample(nrow(data), 5000), ]
+sampled_data = data[sample(nrow(data), 2500), ]
 # Train the random forest model
 set.seed(42)
 rf_model = randomForest(price ~ ., data = sampled_data, ntree = 20)
@@ -55,29 +53,52 @@ rf_model = randomForest(price ~ ., data = sampled_data, ntree = 20)
 ```
 
 ```{r}
-pdp_sqft_living = partial(rf_model, pred.var = "sqft_living", plot = TRUE, rug = TRUE, 
-                           train = sampled_data, grid.resolution = 50)
-pdp_sqft_living$ylab = "Price"
-plot(pdp_sqft_living)
+library(pdp)
+pdp_sqft_living = partial(rf_model, grid.resolution = nrow(sampled_data), pred.var = "sqft_living")
+pdp_bedrooms = partial(rf_model, grid.resolution = nrow(sampled_data), pred.var = "bedrooms")
+pdp_bathrooms = partial(rf_model, grid.resolution = nrow(sampled_data), pred.var = "bathrooms")
+pdp_floors = partial(rf_model, grid.resolution = nrow(sampled_data), pred.var = "floors")
 ```
 
 ```{r}
-pdp_floors = partial(rf_model, pred.var = "floors", plot = TRUE, rug = TRUE, 
-                           train = sampled_data, grid.resolution = 50)
-pdp_floors$ylab = "Price"
-plot(pdp_floors)
-```
+library(ggplot2)
+library(gridExtra)
+p1 = ggplot(data = pdp_sqft_living , aes (x = sqft_living, y = yhat)) + geom_line(size = 1.5)+ scale_x_continuous(limits = c(0, max(pdp_sqft_living$sqft_living))) + 
+      scale_y_continuous(limits = c(0, max(pdp_sqft_living$yhat))) + geom_rug(aes( x = sampled_data$sqft_living) ,sides = 'b') +
+      labs(
+        x = "Sqft_living",
+        y = "Predicted price"
+      ) + theme_minimal()
 
-```{r}
-pdp_bedrooms = partial(rf_model, pred.var = "bedrooms", plot = TRUE, rug = TRUE, 
-                           train = sampled_data, grid.resolution = 50)
-pdp_bedrooms$ylab = "Price"
-plot(pdp_bedrooms)
-```
-```{r}
-pdp_bathrooms = partial(rf_model, pred.var = "bathrooms", plot = TRUE, rug = TRUE, 
-                           train = sampled_data, grid.resolution = 50)
-pdp_bathrooms$ylab = "Price"
-plot(pdp_sqft_bathrooms)
+
+p2 = ggplot(data = pdp_bedrooms , aes (x = bedrooms, y = yhat)) + geom_line(size = 1.5)+ 
+      scale_x_continuous(limits = c(0, max(pdp_bedrooms$bedrooms))) + 
+      scale_y_continuous(limits = c(0, max(pdp_bedrooms$yhat))) + geom_rug(aes(sampled_data$bedrooms) , sides = 'b') +
+      labs(
+        x = "Bedrooms",
+        y = "Predicted price"
+      ) + theme_minimal()
+
+
+p3 = ggplot(data = pdp_bathrooms , aes (x = bathrooms, y = yhat)) + geom_line(size = 1.5)+ 
+      scale_x_continuous(limits = c( min(pdp_bathrooms$bathrooms), max(pdp_bathrooms$bathrooms))) + 
+      scale_y_continuous(limits = c(0, max(pdp_bathrooms$yhat))) + geom_rug(aes(x = sampled_data$bathrooms) ,sides = 'b') +
+      labs(
+        x = "Bathrooms",
+        y = "Predicted price"
+      ) + theme_minimal()
+
+
+p4 = ggplot(data = pdp_floors , aes (x = floors, y = yhat)) + geom_line(size = 1.5)+ 
+      scale_x_continuous(limits = c(0, max(pdp_floors$floors))) + 
+      scale_y_continuous(limits = c(0, max(pdp_floors$yhat))) + geom_rug(aes(x = sampled_data$floors) , sides = 'b') +
+      labs(
+        x = "Floors",
+        y = "Predicted price"
+      ) + theme_minimal()
+
+
+
+grid.arrange(p2,p3,p1,p4, nrow = 1)
 ```
 
